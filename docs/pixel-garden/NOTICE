@@ -1,0 +1,24 @@
+free-Commit-Garden — seasonal GitHub contribution garden
+Copyright (C) 2026 rD227 (XvSu)
+Contact: xusu616@qq.com, 2329976818@qq.com, xusu@stu.hut.edu.cn
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/.
+
+The license covers the code, documentation and bundled garden artwork.
+The original plant atlases were created with image generation tools.
+Their creation prompts are included in docs/pixel-garden/SPRITE-PROMPTS.md.
+No artwork or source code from Forkest is bundled.
+
+Older revisions published under MIT remain available under their original
+license. This GPL notice applies to this revision and subsequent revisions.

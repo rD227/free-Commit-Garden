@@ -1,0 +1,16 @@
+# Add this section to your Hexo _config.yml.
+pixel_garden:
+  enable: true
+  username: YOUR_GITHUB_USERNAME
+  timezone: Asia/Shanghai
+  hemisphere: north
+  live_refresh: true
+
+# Add these entries to inject.head / inject.bottom in Butterfly's configuration.
+# Keep any existing inject entries. Adapt paths when using a site subdirectory.
+# inject:
+#   head:
+#     - <link rel="stylesheet" href="/css/pixel-garden.css">
+#   bottom:
+#     - <script src="/js/pixel-garden-core.js" defer></script>
+#     - <script src="/js/pixel-garden.js" data-config="/garden/config.json" defer></script>

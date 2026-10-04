@@ -1,0 +1,16 @@
+{
+  "name": "free-commit-garden",
+  "version": "0.1.0",
+  "description": "A seasonal pixel garden for GitHub contributions, with weekly and monthly views.",
+  "license": "GPL-3.0-or-later",
+  "author": "rD227 (XvSu)",
+  "repository": { "type": "git", "url": "git+https://github.com/rD227/free-Commit-Garden.git" },
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "build": "node scripts/build.cjs",
+    "demo": "node scripts/build.cjs --demo",
+    "serve": "node scripts/serve.cjs"
+  }
+}
