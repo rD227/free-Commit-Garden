@@ -142,7 +142,8 @@
     widget.querySelector('.pg-range-label').textContent = label;
     widget.querySelector('.pg-total').innerHTML = period.start > currentDay ? 'Not yet' : period.complete ? `<strong>${period.total}</strong> ${period.total === 1 ? 'contribution' : 'contributions'}` : 'Contributions unavailable';
     const previous = state.mode === 'week' ? 'week' : 'month';
-    const trend = period.delta === null ? '' : period.delta === 0 ? `Same as last ${previous}` : `${period.delta > 0 ? '+' : '−'}${Math.abs(period.delta)} vs last ${previous}`;
+    const trendLabel = previous === 'month' ? 'same days last month' : 'last week';
+    const trend = period.delta === null ? '' : period.delta === 0 ? previous === 'month' ? 'No change vs same days last month' : 'Same as last week' : `${period.delta > 0 ? '+' : '−'}${Math.abs(period.delta)} vs ${trendLabel}`;
     widget.querySelector('.pg-trend').textContent = trend;
     widget.querySelector('.pg-freshness').textContent = freshLabel(period);
     const max = viewport.scrollWidth - width;
