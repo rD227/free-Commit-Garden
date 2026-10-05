@@ -197,7 +197,7 @@ test('monthly decorations use only the four busiest days at 15 or more contribut
   assert.equal(core.specialDatesFor(core.makeMonth([{ date: '2026-04-01', count: 15 }], '2026-04-02')).length, 1);
 });
 
-test('summer alternates its exclusive lemonade with an animal, while winter uses drawn lights', async () => {
+test('summer alternates lemonade with an animal, while winter replaces its special shrub with lit artwork', async () => {
   const sheets = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'source', 'garden', 'sprites', 'manifest.json'), 'utf8'));
   const summer = core.makeMonth([{ date: '2026-07-01', count: 15 }, { date: '2026-07-02', count: 15 }], '2026-07-03');
   assert.notEqual(core.decorationFor(summer.days[0], 'summer'), core.decorationFor(summer.days[1], 'summer'));
@@ -206,8 +206,10 @@ test('summer alternates its exclusive lemonade with an animal, while winter uses
   assert.ok(summerSvg.includes('href="/lemonade.png"'));
   assert.ok(!summerSvg.includes('pg-winter-lights'));
   const winter = core.makeMonth([{ date: '2026-01-01', count: 15 }, { date: '2026-01-02', count: 14 }], '2026-01-03');
-  const winterSvg = core.renderMonth(winter, { ...sheets.winter, url: sheets.winter.file }, { decorationSprites: { sparrow: '/sparrow.png' } });
-  assert.equal((winterSvg.match(/class="pg-winter-lights"/g) || []).length, 1);
+  const winterSvg = core.renderMonth(winter, { ...sheets.winter, url: sheets.winter.file }, { decorationSprites: { sparrow: '/sparrow.png', winterLit: '/winter-lit.png' } });
+  assert.equal((winterSvg.match(/href="\/winter-lit.png"/g) || []).length, 1);
+  assert.equal((winterSvg.match(/href="winter-growth-v1.png"/g) || []).length, 1);
+  assert.ok(!winterSvg.includes('pg-winter-lights'));
   assert.ok(!winterSvg.includes('href="/sparrow.png"'));
 });
 

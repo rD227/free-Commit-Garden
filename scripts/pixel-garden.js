@@ -88,7 +88,7 @@ async function generate(hexo, options = {}) {
   let decorationSprites;
   try {
     const manifest = JSON.parse(await fs.readFile(path.join(hexo.source_dir || path.join(hexo.base_dir, 'source'), 'garden', 'sprites', 'decoration-manifest.json'), 'utf8'));
-    decorationSprites = Object.fromEntries(['sparrow', 'frog', 'squirrel', 'lemonade'].map(name => {
+    decorationSprites = Object.fromEntries(['sparrow', 'frog', 'squirrel', 'lemonade', 'winterLit'].map(name => {
       const file = manifest[name];
       if (!/^[a-z0-9-]+\.png$/.test(file)) throw new Error('Invalid decoration manifest');
       return [name, `${root}garden/sprites/${file}`];

@@ -171,19 +171,6 @@
   function renderSprite(sheet, frame, x, y, width, height) {
     return `<svg class="pg-sprite" x="${x}" y="${y}" width="${width}" height="${height}" viewBox="${frame.x} ${frame.y} ${frame.width} ${frame.height}" overflow="hidden" aria-hidden="true"><image href="${escape(sheet.url)}" width="${sheet.width}" height="${sheet.height}" image-rendering="pixelated"/></svg>`;
   }
-  function renderWinterLights(cx, cy, size) {
-    // Tiny fairy lights sit between the snowy needles; the original canopy stays visible.
-    const lights = [
-      [-.25, -.21, '#edc778'], [.17, -.29, '#d98b94'], [.38, -.04, '#a8bddc'],
-      [.25, .25, '#e6ba70'], [-.13, .33, '#90c3b1'], [-.33, .04, '#d98b94']
-    ];
-    const pixel = Math.min(1.8, Math.max(1.2, size / 20));
-    const bulbs = lights.map(([dx, dy, color]) => {
-      const x = cx + dx * size, y = cy + dy * size;
-      return `<rect x="${x - pixel / 2}" y="${y - pixel / 2}" width="${pixel}" height="${pixel}" fill="${color}"/>`;
-    }).join('');
-    return `<g class="pg-winter-lights">${bulbs}</g>`;
-  }
   function renderScene(week, sheet, options) {
     const plantScale = options && Number.isFinite(options.plantScale) && options.plantScale > 0 ? options.plantScale : 1;
     const p = PALETTES[week.season];
@@ -281,6 +268,7 @@
       const cx = x + 16, cy = y + 14;
       let shrub = '';
       let crown = null;
+      const decoration = specialDates.has(day.date) ? decorationFor(day, month.season) : null;
       if (day.count === 0) shrub = rect(cx - 1, cy, 3, 2, p.deep) + rect(cx, cy - 1, 1, 1, p.light);
       else if (day.count > 0) {
         if (spriteFrame(sheet, day.stage)) {
@@ -288,16 +276,18 @@
           const centerX = Math.max(size / 2 + 1, Math.min(cx, 223 - size / 2));
           const centerY = Math.max(size / 2 + 1, Math.min(cy, rows * 32 - 1 - size / 2));
           crown = { x: centerX, y: centerY, size };
-          shrub = `<g class="pg-shrub"><g class="${month.season === 'spring' ? 'pg-sakura-canopy' : 'pg-shrub-canopy'}">${renderSprite(sheet, spriteFrame(sheet, day.stage), centerX - size / 2, centerY - size / 2, size, size)}</g></g>`;
+          const winterLit = decoration === 'lights' && decorationSprites && decorationSprites.winterLit;
+          const sprite = winterLit
+            ? `<image href="${escape(decorationSprites.winterLit)}" x="${centerX - size / 2}" y="${centerY - size / 2}" width="${size}" height="${size}" image-rendering="pixelated" preserveAspectRatio="xMidYMid meet"/>`
+            : renderSprite(sheet, spriteFrame(sheet, day.stage), centerX - size / 2, centerY - size / 2, size, size);
+          shrub = `<g class="pg-shrub"><g class="${month.season === 'spring' ? 'pg-sakura-canopy' : 'pg-shrub-canopy'}">${sprite}</g></g>`;
         } else {
           shrub = `<text class="pg-month-value" x="${cx}" y="${cy + 3}" text-anchor="middle" font-family="monospace" font-size="8" fill="${p.stem}">${day.count}</text>`;
         }
       } else if (!day.future) shrub = `<text x="${cx}" y="${cy + 3}" text-anchor="middle" font-family="monospace" font-size="8" fill="${p.stem}">?</text>`;
       art += `<g${day.future ? ' opacity=".45"' : ''}><title>${escape(dayDescription(day))}</title>${tile}</g>`;
       plants += shrub;
-      const decoration = specialDates.has(day.date) ? decorationFor(day, month.season) : null;
-      if (crown && decoration === 'lights') decorations += renderWinterLights(crown.x, crown.y, crown.size);
-      else if (crown && decoration && decorationSprites && decorationSprites[decoration]) {
+      if (crown && decoration && decoration !== 'lights' && decorationSprites && decorationSprites[decoration]) {
         const iconSize = Math.min(30, 28 * plantScale);
         const iconX = Math.max(x + 1, Math.min(x + 31 - iconSize, crown.x + 1 - iconSize / 2));
         const iconY = Math.max(y + 1, Math.min(y + 31 - iconSize, crown.y - 3 - iconSize / 2));
