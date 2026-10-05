@@ -1,6 +1,6 @@
 # Monthly Garden 特殊装饰素材
 
-使用内置 imagegen 工具生成透明 PNG，参考现有原创月视图灌木的色彩和像素颗粒感。春季麻雀、秋季松鼠、夏季青蛙与柠檬汽水杯各是一张独立素材；冬季彩灯雪松是从项目作者提供的图片中抠出的透明素材。动物参考图只用于主题与气氛，新图不复制其像素排列。全部素材保持透明背景、深色不规则像素轮廓和有限自然色板，不含土壤或文字。
+春季麻雀、秋季松鼠、夏季青蛙与柠檬汽水杯使用内置 imagegen 工具生成透明 PNG，参考现有原创月视图灌木的色彩和像素颗粒感；冬季彩灯雪松由项目作者直接提供透明 PNG。动物参考图只用于主题与气氛，新图不复制其像素排列。全部素材保持透明背景、深色不规则像素轮廓和有限自然色板，不含土壤或文字。
 
 ## Spring sparrow
 
@@ -22,6 +22,6 @@ Generation prompt: Create exactly one whimsical golden-yellow lemonade soda cup,
 
 ## Winter illuminated shrub
 
-Built-in imagegen transparent-background edit of the project author's supplied lit-tree image. Prompt: Cut out only the complete illuminated snow-covered evergreen shrub and its attached light strings, sockets, and subtle colored light halos. Preserve the tree silhouette, snow layers, deep green pixel outline, light positions, wire paths, and luminous colors. Remove the entire pale gray background, gray rectangular marks, borders, and the large white “15” at lower right, replacing every removed area with true alpha transparency. Keep branch tips and bulbs intact. Center the shrub with a small transparent margin. Add no extra ornaments, lettering, ground, soil, or drop shadows. Output one clean transparent pixel-art PNG.
+`winter-lit-v2.png` is the transparent pixel-art shrub directly supplied by the project author. It replaces the previous imagegen cutout. The source file is 1254 × 1254 pixels with real alpha transparency; it has no background or number overlay.
 
 The selection rule lives in `pixel-garden-core.js`: at least 15 contributions, then only the four highest-contribution days in a month receive decorations. Equal counts prefer earlier dates. Summer alternates frog and lemonade by the date's UTC day number; winter replaces the chosen shrub with this artwork.
