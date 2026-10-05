@@ -186,6 +186,32 @@ test('cherry canopies reflect growth without turning missing or future days into
   assert.ok(!summer.includes('pg-sakura-canopy'));
 });
 
+test('monthly decorations use only the four busiest days at 15 or more contributions', async () => {
+  const sheets = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'source', 'garden', 'sprites', 'manifest.json'), 'utf8'));
+  const counts = [15, 16, 16, 20, 14, 25].map((count, index) => ({ date: core.shiftDate('2026-04-01', index), count }));
+  const month = core.makeMonth(counts, '2026-04-07');
+  assert.deepEqual(core.specialDatesFor(month), ['2026-04-06', '2026-04-04', '2026-04-02', '2026-04-03']);
+  const svg = core.renderMonth(month, { ...sheets.spring, url: sheets.spring.file }, { decorationSprites: { sparrow: '/sparrow.png' } });
+  assert.equal((svg.match(/class="pg-month-decoration pg-month-visitor"/g) || []).length, 4);
+  assert.equal((svg.match(/href="\/sparrow.png"/g) || []).length, 4);
+  assert.equal(core.specialDatesFor(core.makeMonth([{ date: '2026-04-01', count: 15 }], '2026-04-02')).length, 1);
+});
+
+test('summer alternates its exclusive lemonade with an animal, while winter uses drawn lights', async () => {
+  const sheets = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'source', 'garden', 'sprites', 'manifest.json'), 'utf8'));
+  const summer = core.makeMonth([{ date: '2026-07-01', count: 15 }, { date: '2026-07-02', count: 15 }], '2026-07-03');
+  assert.notEqual(core.decorationFor(summer.days[0], 'summer'), core.decorationFor(summer.days[1], 'summer'));
+  const summerSvg = core.renderMonth(summer, { ...sheets.summer, url: sheets.summer.file }, { decorationSprites: { frog: '/frog.png', lemonade: '/lemonade.png' } });
+  assert.ok(summerSvg.includes('href="/frog.png"'));
+  assert.ok(summerSvg.includes('href="/lemonade.png"'));
+  assert.ok(!summerSvg.includes('pg-winter-lights'));
+  const winter = core.makeMonth([{ date: '2026-01-01', count: 15 }, { date: '2026-01-02', count: 14 }], '2026-01-03');
+  const winterSvg = core.renderMonth(winter, { ...sheets.winter, url: sheets.winter.file }, { decorationSprites: { sparrow: '/sparrow.png' } });
+  assert.equal((winterSvg.match(/class="pg-winter-lights"/g) || []).length, 1);
+  assert.ok(winterSvg.includes('#f7ce4e') && winterSvg.includes('#df5b4d'));
+  assert.ok(!winterSvg.includes('href="/sparrow.png"'));
+});
+
 test('sprite atlas stages select separate cells without drawing zero, unknown or future plants', () => {
   const counts = [0, 1, 3, 6, 10].map((count, i) => ({ date: core.shiftDate('2026-04-01', i), count }));
   const month = core.makeMonth(counts, '2026-04-07');

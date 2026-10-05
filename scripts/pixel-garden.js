@@ -85,8 +85,17 @@ async function generate(hexo, options = {}) {
   }
   const spriteSheets = await readSheets('manifest.json');
   const weeklySpriteSheets = await readSheets('weekly-manifest.json');
+  let decorationSprites;
+  try {
+    const manifest = JSON.parse(await fs.readFile(path.join(hexo.source_dir || path.join(hexo.base_dir, 'source'), 'garden', 'sprites', 'decoration-manifest.json'), 'utf8'));
+    decorationSprites = Object.fromEntries(['sparrow', 'frog', 'squirrel', 'lemonade'].map(name => {
+      const file = manifest[name];
+      if (!/^[a-z0-9-]+\.png$/.test(file)) throw new Error('Invalid decoration manifest');
+      return [name, `${root}garden/sprites/${file}`];
+    }));
+  } catch (_) { /* The garden still renders when optional decorations are unavailable. */ }
   const config = { enable: true, username, timezone, hemisphere, liveRefresh: settings.live_refresh !== false,
-    snapshotUrl: `${root}garden/data.json`, spriteSheets, weeklySpriteSheets };
+    snapshotUrl: `${root}garden/data.json`, spriteSheets, weeklySpriteSheets, decorationSprites };
   return [
     { path: 'garden/config.json', data: JSON.stringify(config) },
     { path: 'garden/data.json', data: JSON.stringify(snapshot) },

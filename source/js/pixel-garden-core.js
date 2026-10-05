@@ -49,6 +49,22 @@
     return count === 0 ? 0 : count < 3 ? 1 : count < 6 ? 2 : count < 10 ? 3 : 4;
   }
 
+  // A rare monthly accent for a day with at least 15 contributions.
+  function decorationFor(day, season) {
+    if (!day || day.future || day.count === null || day.count < 15) return null;
+    if (season === 'winter') return 'lights';
+    if (season === 'spring') return 'sparrow';
+    if (season === 'autumn') return 'squirrel';
+    if (season === 'summer') return Math.floor(Date.parse(`${day.date}T00:00:00Z`) / DAY) % 2 ? 'frog' : 'lemonade';
+    return null;
+  }
+
+  function specialDatesFor(month) {
+    return month.days.filter(day => decorationFor(day, month.season))
+      .sort((left, right) => right.count - left.count || left.date.localeCompare(right.date))
+      .slice(0, 4).map(day => day.date);
+  }
+
   // Missing dates stay unknown. Future dates are never treated as zero contributions.
   function countMap(contributions) {
     const counts = new Map();
@@ -155,6 +171,24 @@
   function renderSprite(sheet, frame, x, y, width, height) {
     return `<svg class="pg-sprite" x="${x}" y="${y}" width="${width}" height="${height}" viewBox="${frame.x} ${frame.y} ${frame.width} ${frame.height}" overflow="hidden" aria-hidden="true"><image href="${escape(sheet.url)}" width="${sheet.width}" height="${sheet.height}" image-rendering="pixelated"/></svg>`;
   }
+  function renderWinterLights(cx, cy, size) {
+    const strands = [
+      [[-.3, -.26], [-.09, -.4], [.16, -.28], [.38, -.22]],
+      [[-.39, .06], [-.17, -.1], [.11, .09], [.39, -.04]],
+      [[-.3, .31], [-.06, .17], [.19, .35], [.35, .21]]
+    ];
+    const cord = strands.map(strand => `<polyline points="${strand.map(([dx, dy]) => `${cx + dx * size},${cy + dy * size}`).join(' ')}" fill="none" stroke="#765a48" stroke-width="${size / 30}" opacity=".95"/>`).join('');
+    const bulbs = [
+      [-.3, -.26, '#f7ce4e'], [.16, -.28, '#df5b4d'], [.38, -.22, '#f7ce4e'],
+      [-.39, .06, '#df5b4d'], [-.17, -.1, '#f7ce4e'], [.11, .09, '#a0d7bc'], [.39, -.04, '#df5b4d'],
+      [-.3, .31, '#f7ce4e'], [-.06, .17, '#df5b4d'], [.19, .35, '#f7ce4e']
+    ].map(([dx, dy, color], index) => {
+      const x = cx + dx * size, y = cy + dy * size;
+      const width = size / 10, height = size / 7.5;
+      return `<g transform="translate(${x} ${y}) rotate(${index % 2 ? -28 : 28})"><rect x="${-width / 2}" y="${-height / 2}" width="${width}" height="${height}" rx="${width / 3}" fill="${color}"/><rect x="${-width / 4}" y="${-height / 2}" width="${width / 3}" height="${height / 3}" fill="#fff5d9" opacity=".8"/></g>`;
+    }).join('');
+    return `<g class="pg-winter-lights">${cord}${bulbs}</g>`;
+  }
   function renderScene(week, sheet, options) {
     const plantScale = options && Number.isFinite(options.plantScale) && options.plantScale > 0 ? options.plantScale : 1;
     const p = PALETTES[week.season];
@@ -234,11 +268,14 @@
   // Paint all ground first so enlarged crowns can overlap neighboring plots.
   function renderMonth(month, sheet, options) {
     const plantScale = options && Number.isFinite(options.plantScale) && options.plantScale > 0 ? options.plantScale : 1;
+    const decorationSprites = options && options.decorationSprites;
     const p = PALETTES[month.season];
     const rows = month.cells.length / 7;
+    const specialDates = new Set(specialDatesFor(month));
     const rect = (x, y, w, h, fill, extra) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"${extra || ''}/>`;
     let art = rect(0, 0, 224, rows * 32, p.sky);
     let plants = '';
+    let decorations = '';
     month.cells.forEach((day, index) => {
       if (!day) return;
       const x = index % 7 * 32, y = Math.floor(index / 7) * 32;
@@ -248,12 +285,14 @@
       if (day.today) tile += `<rect x="${x + 1}" y="${y + 1}" width="30" height="30" rx="2" fill="none" stroke="${p.stem}"/>`;
       const cx = x + 16, cy = y + 14;
       let shrub = '';
+      let crown = null;
       if (day.count === 0) shrub = rect(cx - 1, cy, 3, 2, p.deep) + rect(cx, cy - 1, 1, 1, p.light);
       else if (day.count > 0) {
         if (spriteFrame(sheet, day.stage)) {
           const size = (sheet.frames ? [0, 8, 13, 19, 24][day.stage] : 24) * plantScale;
           const centerX = Math.max(size / 2 + 1, Math.min(cx, 223 - size / 2));
           const centerY = Math.max(size / 2 + 1, Math.min(cy, rows * 32 - 1 - size / 2));
+          crown = { x: centerX, y: centerY, size };
           shrub = `<g class="pg-shrub"><g class="${month.season === 'spring' ? 'pg-sakura-canopy' : 'pg-shrub-canopy'}">${renderSprite(sheet, spriteFrame(sheet, day.stage), centerX - size / 2, centerY - size / 2, size, size)}</g></g>`;
         } else {
           shrub = `<text class="pg-month-value" x="${cx}" y="${cy + 3}" text-anchor="middle" font-family="monospace" font-size="8" fill="${p.stem}">${day.count}</text>`;
@@ -261,8 +300,18 @@
       } else if (!day.future) shrub = `<text x="${cx}" y="${cy + 3}" text-anchor="middle" font-family="monospace" font-size="8" fill="${p.stem}">?</text>`;
       art += `<g${day.future ? ' opacity=".45"' : ''}><title>${escape(dayDescription(day))}</title>${tile}</g>`;
       plants += shrub;
+      const decoration = specialDates.has(day.date) ? decorationFor(day, month.season) : null;
+      if (crown && decoration === 'lights') decorations += renderWinterLights(crown.x, crown.y, crown.size);
+      else if (crown && decoration && decorationSprites && decorationSprites[decoration]) {
+        const iconSize = Math.min(30, 28 * plantScale);
+        const iconX = Math.max(x + 1, Math.min(x + 31 - iconSize, crown.x + 1 - iconSize / 2));
+        const iconY = Math.max(y + 1, Math.min(y + 31 - iconSize, crown.y - 3 - iconSize / 2));
+        const kind = decoration === 'lemonade' ? 'pg-month-lemonade' : 'pg-month-visitor';
+        decorations += `<g class="pg-month-decoration ${kind}" style="--pg-visitor-delay:-${index % 5 * .41}s"><image href="${escape(decorationSprites[decoration])}" x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" image-rendering="pixelated" preserveAspectRatio="xMidYMid meet"/></g>`;
+      }
     });
     art += `<g class="pg-month-plants" aria-hidden="true">${plants}</g>`;
+    art += `<g class="pg-month-decorations" aria-hidden="true">${decorations}</g>`;
     art += renderWeather(month.season, 224, rows * 32);
     return `<svg xmlns="http://www.w3.org/2000/svg" class="pg-scene pg-month-scene" viewBox="0 0 224 ${rows * 32}" role="img" aria-label="${escape(`${month.start.slice(0, 7)} · ${p.label}, top-down shrub contribution garden`)}" shape-rendering="crispEdges">${art}</svg>`;
   }
@@ -273,5 +322,5 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" width="280" height="208" viewBox="0 0 280 208" role="img" aria-label="${escape(`${username} · ${total}`)}"><rect width="280" height="208" rx="12" fill="#fffaf3"/><g font-family="system-ui, sans-serif" fill="#655a47"><text x="16" y="26" font-size="14" font-weight="600">${VIEW_TITLES.week}</text><text x="264" y="25" font-size="11" text-anchor="end">${PALETTES[week.season].label}</text><text x="16" y="45" font-size="10">${date}</text></g><svg x="16" y="55" width="248" height="124" viewBox="0 0 224 112">${renderScene(week).replace(/^<svg[^>]*>|<\/svg>$/g, '')}</svg><text x="16" y="196" font-family="system-ui, sans-serif" font-size="11" fill="#655a47">${escape(total)} · @${escape(username)}</text></svg>`;
   }
 
-  return { PALETTES, STAGES, VIEW_TITLES, WEEKDAYS, escape, dateKey, shiftDate, shiftMonth, seasonFor, stageFor, makeWeek, makeMonth, dayDescription, renderScene, renderMonth, renderWeather, renderBadge };
+  return { PALETTES, STAGES, VIEW_TITLES, WEEKDAYS, escape, dateKey, shiftDate, shiftMonth, seasonFor, stageFor, decorationFor, specialDatesFor, makeWeek, makeMonth, dayDescription, renderScene, renderMonth, renderWeather, renderBadge };
 });

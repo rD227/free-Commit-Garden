@@ -76,7 +76,7 @@
   }
   function panelHtml(period, mode, placement) {
     const visual = mode === 'week' ? `<div class="pg-landscape">${core.renderScene(period, config.weeklySpriteSheets && config.weeklySpriteSheets[period.season], { plantScale: placement === 'sidebar' ? SIDEBAR_WEEKLY_PLANT_SCALE : 1 })}</div><div class="pg-week" role="group" aria-label="Daily contributions">${period.days.map(day => dayButton(day, false)).join('')}</div>` :
-      `<div class="pg-month-weekdays" aria-hidden="true">${core.WEEKDAYS.map(day => `<span>${day}</span>`).join('')}</div><div class="pg-month-map">${core.renderMonth(period, config.spriteSheets && config.spriteSheets[period.season], { plantScale: placement === 'sidebar' ? SIDEBAR_MONTHLY_PLANT_SCALE : 1 })}<div class="pg-month-grid" role="group" aria-label="${period.start.slice(0, 7)} Daily contributions">${period.cells.map(day => day ? dayButton(day, true) : '<span aria-hidden="true"></span>').join('')}</div></div>`;
+      `<div class="pg-month-weekdays" aria-hidden="true">${core.WEEKDAYS.map(day => `<span>${day}</span>`).join('')}</div><div class="pg-month-map">${core.renderMonth(period, config.spriteSheets && config.spriteSheets[period.season], { plantScale: placement === 'sidebar' ? SIDEBAR_MONTHLY_PLANT_SCALE : 1, decorationSprites: config.decorationSprites })}<div class="pg-month-grid" role="group" aria-label="${period.start.slice(0, 7)} Daily contributions">${period.cells.map(day => day ? dayButton(day, true) : '<span aria-hidden="true"></span>').join('')}</div></div>`;
     return visual;
   }
   // Empty shells preserve scroll geometry; only intersecting panels get artwork.

@@ -190,13 +190,20 @@
 .pg-weather-leaves { --pg-weather-opacity: .65; }
 .pg-leaf-flutter { animation: pg-leaf-flutter var(--pg-flutter-duration, 3s) ease-in-out var(--pg-fall-delay, 0s) infinite; transform-box: fill-box; transform-origin: center; }
 .pg-weather-snow { --pg-weather-opacity: .85; }
+.pg-month-visitor {
+  transform-box: fill-box;
+  animation: pg-visitor-bob 2.8s ease-in-out var(--pg-visitor-delay, 0s) infinite;
+}
 .pg-panel:not([data-visible="true"]) .pg-plant,
 .pg-panel:not([data-visible="true"]) .pg-weather-particle,
 .pg-panel:not([data-visible="true"]) .pg-leaf-flutter,
+.pg-panel:not([data-visible="true"]) .pg-month-visitor,
 .pixel-garden[data-paused="true"] .pg-plant,
 .pixel-garden[data-paused="true"] .pg-weather-particle,
-.pixel-garden[data-paused="true"] .pg-leaf-flutter { animation-play-state: paused; }
+.pixel-garden[data-paused="true"] .pg-leaf-flutter,
+.pixel-garden[data-paused="true"] .pg-month-visitor { animation-play-state: paused; }
 @keyframes pg-wind { 0%, 100% { transform: skewX(-1.5deg); } 45% { transform: skewX(2deg); } 70% { transform: skewX(.5deg); } }
+@keyframes pg-visitor-bob { 0%, 100% { transform: translateY(1px); } 50% { transform: translateY(-1.5px); } }
 @keyframes pg-fall {
   0% { transform: translate(0, 0); opacity: 0; }
   8%, 85% { opacity: var(--pg-weather-opacity, .5); }
@@ -207,6 +214,6 @@
   50% { transform: translateX(var(--pg-flutter-width, 7px)) rotate(30deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pg-plant, .pg-weather-particle, .pg-leaf-flutter { animation: none; }
+  .pg-plant, .pg-weather-particle, .pg-leaf-flutter, .pg-month-visitor { animation: none; }
 }
 [data-theme="dark"] .pg-panel { --pg-soft: #33362e; --pg-accent: #c2ac7f; }
