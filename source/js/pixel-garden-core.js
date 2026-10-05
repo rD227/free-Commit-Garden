@@ -172,20 +172,17 @@
     return `<svg class="pg-sprite" x="${x}" y="${y}" width="${width}" height="${height}" viewBox="${frame.x} ${frame.y} ${frame.width} ${frame.height}" overflow="hidden" aria-hidden="true"><image href="${escape(sheet.url)}" width="${sheet.width}" height="${sheet.height}" image-rendering="pixelated"/></svg>`;
   }
   function renderWinterLights(cx, cy, size) {
-    const strands = [
-      [[-.33, -.18], [-.21, -.3], [-.08, -.2], [.1, -.31], [.28, -.2]],
-      [[-.36, .14], [-.2, .03], [-.03, .16], [.18, .02], [.36, .13]]
+    // Tiny fairy lights sit between the snowy needles; the original canopy stays visible.
+    const lights = [
+      [-.25, -.21, '#edc778'], [.17, -.29, '#d98b94'], [.38, -.04, '#a8bddc'],
+      [.25, .25, '#e6ba70'], [-.13, .33, '#90c3b1'], [-.33, .04, '#d98b94']
     ];
-    const cord = strands.map(strand => `<polyline points="${strand.map(([dx, dy]) => `${Math.round(cx + dx * size)},${Math.round(cy + dy * size)}`).join(' ')}" fill="none" stroke="#4a6863" stroke-width="${Math.max(1, size / 30)}"/>`).join('');
-    const bulbs = [
-      [-.33, -.18, '#eabd67'], [-.08, -.2, '#d57985'], [.28, -.2, '#90add5'],
-      [-.36, .14, '#75b9aa'], [-.03, .16, '#eabd67'], [.36, .13, '#d57985']
-    ].map(([dx, dy, color]) => {
-      const x = Math.round(cx + dx * size), y = Math.round(cy + dy * size);
-      const pixel = Math.max(1, Math.round(size / 24));
-      return `<rect x="${x - pixel}" y="${y - pixel}" width="${pixel * 3}" height="${pixel * 3}" fill="#35514d"/><rect x="${x}" y="${y}" width="${pixel * 2}" height="${pixel * 2}" fill="${color}"/><rect x="${x}" y="${y}" width="${pixel}" height="${pixel}" fill="#fff9e9"/>`;
+    const pixel = Math.min(1.8, Math.max(1.2, size / 20));
+    const bulbs = lights.map(([dx, dy, color]) => {
+      const x = cx + dx * size, y = cy + dy * size;
+      return `<rect x="${x - pixel / 2}" y="${y - pixel / 2}" width="${pixel}" height="${pixel}" fill="${color}"/>`;
     }).join('');
-    return `<g class="pg-winter-lights">${cord}${bulbs}</g>`;
+    return `<g class="pg-winter-lights">${bulbs}</g>`;
   }
   function renderScene(week, sheet, options) {
     const plantScale = options && Number.isFinite(options.plantScale) && options.plantScale > 0 ? options.plantScale : 1;
