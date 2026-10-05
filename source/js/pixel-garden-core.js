@@ -173,19 +173,17 @@
   }
   function renderWinterLights(cx, cy, size) {
     const strands = [
-      [[-.3, -.26], [-.09, -.4], [.16, -.28], [.38, -.22]],
-      [[-.39, .06], [-.17, -.1], [.11, .09], [.39, -.04]],
-      [[-.3, .31], [-.06, .17], [.19, .35], [.35, .21]]
+      [[-.33, -.18], [-.21, -.3], [-.08, -.2], [.1, -.31], [.28, -.2]],
+      [[-.36, .14], [-.2, .03], [-.03, .16], [.18, .02], [.36, .13]]
     ];
-    const cord = strands.map(strand => `<polyline points="${strand.map(([dx, dy]) => `${cx + dx * size},${cy + dy * size}`).join(' ')}" fill="none" stroke="#765a48" stroke-width="${size / 30}" opacity=".95"/>`).join('');
+    const cord = strands.map(strand => `<polyline points="${strand.map(([dx, dy]) => `${Math.round(cx + dx * size)},${Math.round(cy + dy * size)}`).join(' ')}" fill="none" stroke="#4a6863" stroke-width="${Math.max(1, size / 30)}"/>`).join('');
     const bulbs = [
-      [-.3, -.26, '#f7ce4e'], [.16, -.28, '#df5b4d'], [.38, -.22, '#f7ce4e'],
-      [-.39, .06, '#df5b4d'], [-.17, -.1, '#f7ce4e'], [.11, .09, '#a0d7bc'], [.39, -.04, '#df5b4d'],
-      [-.3, .31, '#f7ce4e'], [-.06, .17, '#df5b4d'], [.19, .35, '#f7ce4e']
-    ].map(([dx, dy, color], index) => {
-      const x = cx + dx * size, y = cy + dy * size;
-      const width = size / 10, height = size / 7.5;
-      return `<g transform="translate(${x} ${y}) rotate(${index % 2 ? -28 : 28})"><rect x="${-width / 2}" y="${-height / 2}" width="${width}" height="${height}" rx="${width / 3}" fill="${color}"/><rect x="${-width / 4}" y="${-height / 2}" width="${width / 3}" height="${height / 3}" fill="#fff5d9" opacity=".8"/></g>`;
+      [-.33, -.18, '#eabd67'], [-.08, -.2, '#d57985'], [.28, -.2, '#90add5'],
+      [-.36, .14, '#75b9aa'], [-.03, .16, '#eabd67'], [.36, .13, '#d57985']
+    ].map(([dx, dy, color]) => {
+      const x = Math.round(cx + dx * size), y = Math.round(cy + dy * size);
+      const pixel = Math.max(1, Math.round(size / 24));
+      return `<rect x="${x - pixel}" y="${y - pixel}" width="${pixel * 3}" height="${pixel * 3}" fill="#35514d"/><rect x="${x}" y="${y}" width="${pixel * 2}" height="${pixel * 2}" fill="${color}"/><rect x="${x}" y="${y}" width="${pixel}" height="${pixel}" fill="#fff9e9"/>`;
     }).join('');
     return `<g class="pg-winter-lights">${cord}${bulbs}</g>`;
   }
@@ -307,7 +305,7 @@
         const iconX = Math.max(x + 1, Math.min(x + 31 - iconSize, crown.x + 1 - iconSize / 2));
         const iconY = Math.max(y + 1, Math.min(y + 31 - iconSize, crown.y - 3 - iconSize / 2));
         const kind = decoration === 'lemonade' ? 'pg-month-lemonade' : 'pg-month-visitor';
-        decorations += `<g class="pg-month-decoration ${kind}" style="--pg-visitor-delay:-${index % 5 * .41}s"><image href="${escape(decorationSprites[decoration])}" x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" image-rendering="pixelated" preserveAspectRatio="xMidYMid meet"/></g>`;
+        decorations += `<g class="pg-month-decoration ${kind}" data-date="${day.date}" style="--pg-visitor-delay:-${index % 5 * .41}s"><image href="${escape(decorationSprites[decoration])}" x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" image-rendering="pixelated" preserveAspectRatio="xMidYMid meet"/></g>`;
       }
     });
     art += `<g class="pg-month-plants" aria-hidden="true">${plants}</g>`;

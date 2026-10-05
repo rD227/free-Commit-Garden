@@ -208,7 +208,6 @@ test('summer alternates its exclusive lemonade with an animal, while winter uses
   const winter = core.makeMonth([{ date: '2026-01-01', count: 15 }, { date: '2026-01-02', count: 14 }], '2026-01-03');
   const winterSvg = core.renderMonth(winter, { ...sheets.winter, url: sheets.winter.file }, { decorationSprites: { sparrow: '/sparrow.png' } });
   assert.equal((winterSvg.match(/class="pg-winter-lights"/g) || []).length, 1);
-  assert.ok(winterSvg.includes('#f7ce4e') && winterSvg.includes('#df5b4d'));
   assert.ok(!winterSvg.includes('href="/sparrow.png"'));
 });
 

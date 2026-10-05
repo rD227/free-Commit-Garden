@@ -183,7 +183,7 @@
 .pixel-garden .pg-month-day.is-future { opacity: .55; }
 .pg-month-number { position: absolute; bottom: 1px; right: 3px; font-size: 8px; line-height: 1.3; text-shadow: 0 1px 1px #665e4d; font-variant-numeric: tabular-nums; }
 
-/* Only the plant moves; soil, dates and hills stay still. */
+/* Weekly plants and monthly visitors move independently; the ground and dates stay still. */
 .pg-plant { transform-box: view-box; animation: pg-wind var(--pg-wind-duration, 4.8s) ease-in-out var(--pg-wind-delay, 0s) infinite; }
 .pg-weather-particle { animation: pg-fall var(--pg-fall-duration, 6s) linear var(--pg-fall-delay, 0s) infinite; }
 .pg-weather-rain { --pg-weather-opacity: .32; }
@@ -194,16 +194,21 @@
   transform-box: fill-box;
   animation: pg-visitor-bob 2.8s ease-in-out var(--pg-visitor-delay, 0s) infinite;
 }
+.pg-month-lemonade { transform-box: fill-box; transform-origin: center; }
+.pg-month-lemonade.is-flipping { animation: pg-lemonade-flip .72s ease-in-out both; }
 .pg-panel:not([data-visible="true"]) .pg-plant,
 .pg-panel:not([data-visible="true"]) .pg-weather-particle,
 .pg-panel:not([data-visible="true"]) .pg-leaf-flutter,
 .pg-panel:not([data-visible="true"]) .pg-month-visitor,
+.pg-panel:not([data-visible="true"]) .pg-month-lemonade.is-flipping,
 .pixel-garden[data-paused="true"] .pg-plant,
 .pixel-garden[data-paused="true"] .pg-weather-particle,
 .pixel-garden[data-paused="true"] .pg-leaf-flutter,
-.pixel-garden[data-paused="true"] .pg-month-visitor { animation-play-state: paused; }
+.pixel-garden[data-paused="true"] .pg-month-visitor,
+.pixel-garden[data-paused="true"] .pg-month-lemonade.is-flipping { animation-play-state: paused; }
 @keyframes pg-wind { 0%, 100% { transform: skewX(-1.5deg); } 45% { transform: skewX(2deg); } 70% { transform: skewX(.5deg); } }
 @keyframes pg-visitor-bob { 0%, 100% { transform: translateY(1px); } 50% { transform: translateY(-1.5px); } }
+@keyframes pg-lemonade-flip { 0%, 100% { transform: scaleX(1) translateY(0); } 50% { transform: scaleX(-1) translateY(-2px); } }
 @keyframes pg-fall {
   0% { transform: translate(0, 0); opacity: 0; }
   8%, 85% { opacity: var(--pg-weather-opacity, .5); }
@@ -214,6 +219,6 @@
   50% { transform: translateX(var(--pg-flutter-width, 7px)) rotate(30deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pg-plant, .pg-weather-particle, .pg-leaf-flutter, .pg-month-visitor { animation: none; }
+  .pg-plant, .pg-weather-particle, .pg-leaf-flutter, .pg-month-visitor, .pg-month-lemonade.is-flipping { animation: none; }
 }
 [data-theme="dark"] .pg-panel { --pg-soft: #33362e; --pg-accent: #c2ac7f; }

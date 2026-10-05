@@ -68,15 +68,17 @@
     state.models.set(offset, period);
     return period;
   }
-  function dayButton(day, month) {
+  function dayButton(day, month, flipCup) {
     const classes = `pg-day${month ? ' pg-month-day' : ''}${day.today ? ' is-today' : ''}${day.future ? ' is-future' : ''}`;
-    const label = core.escape(core.dayDescription(day));
+    const label = core.escape(core.dayDescription(day) + (flipCup ? ' · Click to flip lemonade' : ''));
     const content = month ? `<span class="pg-month-number">${Number(day.date.slice(8))}</span>` : `<span>${day.label}</span><span class="pg-count">${day.future ? '·' : day.count === null ? '?' : day.count}</span>`;
-    return `<button type="button" class="${classes}" data-date="${day.date}" aria-label="${label}" title="${label}"${day.today ? ' aria-current="date"' : ''}>${content}</button>`;
+    return `<button type="button" class="${classes}" data-date="${day.date}" aria-label="${label}" title="${label}"${flipCup ? ' data-lemonade="true"' : ''}${day.today ? ' aria-current="date"' : ''}>${content}</button>`;
   }
   function panelHtml(period, mode, placement) {
+    const cupDates = mode === 'month' && period.season === 'summer' && config.spriteSheets && config.spriteSheets.summer && config.decorationSprites && config.decorationSprites.lemonade
+      ? new Set(core.specialDatesFor(period).filter(date => core.decorationFor(period.days.find(day => day.date === date), period.season) === 'lemonade')) : null;
     const visual = mode === 'week' ? `<div class="pg-landscape">${core.renderScene(period, config.weeklySpriteSheets && config.weeklySpriteSheets[period.season], { plantScale: placement === 'sidebar' ? SIDEBAR_WEEKLY_PLANT_SCALE : 1 })}</div><div class="pg-week" role="group" aria-label="Daily contributions">${period.days.map(day => dayButton(day, false)).join('')}</div>` :
-      `<div class="pg-month-weekdays" aria-hidden="true">${core.WEEKDAYS.map(day => `<span>${day}</span>`).join('')}</div><div class="pg-month-map">${core.renderMonth(period, config.spriteSheets && config.spriteSheets[period.season], { plantScale: placement === 'sidebar' ? SIDEBAR_MONTHLY_PLANT_SCALE : 1, decorationSprites: config.decorationSprites })}<div class="pg-month-grid" role="group" aria-label="${period.start.slice(0, 7)} Daily contributions">${period.cells.map(day => day ? dayButton(day, true) : '<span aria-hidden="true"></span>').join('')}</div></div>`;
+      `<div class="pg-month-weekdays" aria-hidden="true">${core.WEEKDAYS.map(day => `<span>${day}</span>`).join('')}</div><div class="pg-month-map">${core.renderMonth(period, config.spriteSheets && config.spriteSheets[period.season], { plantScale: placement === 'sidebar' ? SIDEBAR_MONTHLY_PLANT_SCALE : 1, decorationSprites: config.decorationSprites })}<div class="pg-month-grid" role="group" aria-label="${period.start.slice(0, 7)} Daily contributions">${period.cells.map(day => day ? dayButton(day, true, cupDates && cupDates.has(day.date)) : '<span aria-hidden="true"></span>').join('')}</div></div>`;
     return visual;
   }
   // Empty shells preserve scroll geometry; only intersecting panels get artwork.
@@ -258,10 +260,19 @@
       if (Date.now() < (state.suppressClickUntil || 0)) return;
       const button = event.target.closest('.pg-day');
       if (!button) return;
-      const day = model(state, Number(button.closest('.pg-panel').dataset.offset)).days.find(day => day.date === button.dataset.date);
+      const panel = button.closest('.pg-panel');
+      const day = model(state, Number(panel.dataset.offset)).days.find(day => day.date === button.dataset.date);
       state.detail = core.dayDescription(day);
       widget.querySelector('.pg-detail').textContent = state.detail;
       widget.querySelector('.pg-detail').hidden = false;
+      if (button.dataset.lemonade === 'true' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const cup = panel.querySelector(`.pg-month-lemonade[data-date="${button.dataset.date}"]`);
+        if (cup) {
+          cup.classList.remove('is-flipping');
+          void cup.getBoundingClientRect();
+          cup.classList.add('is-flipping');
+        }
+      }
     });
     scrollbar.addEventListener('pointerdown', () => { state.scrubbing = true; });
     scrollbar.addEventListener('input', () => {
